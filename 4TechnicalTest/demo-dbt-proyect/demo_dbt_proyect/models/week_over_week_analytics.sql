@@ -17,8 +17,15 @@ WITH weekly_data_lag AS (
         LAG(bounce_rate) OVER (ORDER BY week_start_date) AS prev_bounce_rate,
         LAG(conversion_rate) OVER (ORDER BY week_start_date) AS prev_conversion_rate,
         LAG(average_session_duration) OVER (ORDER BY week_start_date) AS prev_avg_session_duration
-    FROM
-        {{ ref('week_over_week_analytics_int') }}
+        devices,
+        devices_id,
+        country,
+        country_id,
+        postal_co,
+        campaign,
+        campaign_id
+        FROM
+            {{ ref('week_over_week_analytics_int') }}
 )
 
 SELECT
@@ -41,6 +48,13 @@ SELECT
     SAFE_DIVIDE(bounce_rate - prev_bounce_rate, prev_bounce_rate) * 100 AS pct_change_bounce_rate,
     SAFE_DIVIDE(conversion_rate - prev_conversion_rate, prev_conversion_rate) * 100 AS pct_change_conversion_rate,
     SAFE_DIVIDE(average_session_duration - prev_avg_session_duration, prev_avg_session_duration) * 100 AS pct_change_avg_session_duration
+    devices,
+    devices_id,
+    country,
+    country_id,
+    postal_co,
+    campaign,
+    campaign_id
 FROM
     weekly_data_lag
 ORDER BY

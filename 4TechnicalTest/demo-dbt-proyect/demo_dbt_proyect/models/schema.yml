@@ -4,26 +4,164 @@ models:
   - name: week_over_week_analytics_stg
     description: "Week Analytics Stage"
     columns:
-      - name: id
-        description: "The primary key for this table"
-        data_tests:
-          - unique
-          - not_null
+      - name: sessions
+        description: ""
+
+      - name: week_start_date
+        description: ""
+
+      - name: average_session_duration
+        description: ""
+
+      - name: pageviews
+        description: ""
+
+      - name: users
+        description: ""
+
+      - name: bounce_rate
+        description: ""
+
+      - name: conversion_rate
+        description: ""
+
+      - name: devices
+        description: ""
+
+      - name: country
+        description: ""
+
+      - name: postal_co
+        description: ""
+
+      - name: campaign
+        description: ""
+
+      - name: campaign_id
+        description: ""
 
   - name: week_over_week_analytics_int
     description: "Week Analytics Intermediate"
     columns:
-      - name: id
-        description: "The primary key for this table"
-        data_tests:
-          - unique
-          - not_null
+      - name: sessions
+        description: ""
+
+      - name: week_start_date
+        description: ""
+
+      - name: average_session_duration
+        description: ""
+
+      - name: pageviews
+        description: ""
+
+      - name: users
+        description: ""
+
+      - name: bounce_rate
+        description: ""
+
+      - name: conversion_rate
+        description: ""
+
+      - name: devices
+        description: ""
+
+      - name: devices_id
+        description: ""
+
+      - name: country_id
+        description: ""
+
+      - name: country
+        description: ""
+
+      - name: postal_co
+        description: ""
+
+      - name: campaign
+        description: ""
+
+      - name: campaign_id
+        description: ""
 
   - name: week_over_week_analytics
-    description: "Week Analytics Intermediate"
+    description: "Week Analytics Final Table"
     columns:
-      - name: id
-        description: "The primary key for this table"
-        data_tests:
-          - unique
-          - not_null
+      - name: sessions
+        description: ""
+
+      - name: week_start_date
+        description: ""
+
+      - name: average_session_duration
+        description: ""
+
+      - name: pageviews
+        description: ""
+
+      - name: users
+        description: ""
+
+      - name: bounce_rate
+        description: ""
+
+      - name: conversion_rate
+        description: ""
+
+      - name: devices
+        description: ""
+
+      - name: devices_id
+        description: ""
+
+      - name: country_id
+        description: ""
+
+      - name: country
+        description: ""
+
+      - name: postal_co
+        description: ""
+
+      - name: campaign
+        description: ""
+
+      - name: campaign_id
+        description: ""
+
+      - name: prev_sessions
+        description: ""
+
+      - name: prev_pageviews
+        description: ""
+
+      - name: prev_users
+        description: ""
+
+      - name: prev_bounce_rate
+        description: ""
+
+      - name: prev_conversion_rate
+        description: ""
+
+      - name: prev_avg_session_duration
+        description: ""
+
+      - name: pct_change_sessions
+        description: ""
+
+      - name: pct_change_pageviews
+        description: ""
+
+      - name: pct_change_users
+        description: ""
+
+      - name: pct_change_bounce_rate
+        description: ""
+
+      - name: pct_change_conversion_rate
+        description: ""
+
+      - name: pct_change_avg_session_duration
+        description: ""

@@ -2,7 +2,7 @@
     materialized = 'view'
 ) }}
 
-WITH raw_data AS (
+WITH source AS (
 
     SELECT
         week_start_date,
@@ -13,7 +13,10 @@ WITH raw_data AS (
         conversion_rate,
         average_session_duration,
         devices,
-        geography
+        country,
+        postal_co,
+        campaign,
+        campaign_id
     FROM
         {{ source('analytics', 'weekly_analytics_report') }}
 )
@@ -26,6 +29,9 @@ SELECT
     conversion_rate,
     average_session_duration,
     devices,
-    geography
+    country,
+    postal_co,
+    campaign,
+    campaign_id
 FROM
-    raw_data
+    source
