@@ -221,29 +221,257 @@ We need to define dbt models to handle the extraction and transformation of data
 We create an staging, intermediate and final model.
 ### Staging Model
 <a href = "https://github.com/katerinneramos/data-engineer-technical-test/blob/addProyect/4TechnicalTest/demo-dbt-proyect/demo_dbt_proyect/models/week_over_week_analytics_stg.sql">Link to Staging Model: week_over_week_analytics_stg.sql</a>
-<br>
+
+```SQL
+{{ config(
+    materialized = 'view'
+) }}
+
+WITH source AS (
+
+    SELECT
+        week_start_date,
+        sessions,
+        pageviews,
+        users,
+        bounce_rate,
+        conversion_rate,
+        average_session_duration,
+        devices,
+        country,
+        postal_co,
+        campaign,
+        campaign_id
+    FROM
+        {{ source('analytics-report', 'weekly_analytics_report') }}
+)
+SELECT
+    week_start_date,
+    sessions,
+    pageviews,
+    users,
+    bounce_rate,
+    conversion_rate,
+    average_session_duration,
+    devices,
+    country,
+    postal_co,
+    campaign,
+    campaign_id
+FROM
+    source
+
+```
 
 ### Intermediate Model
 <a href = "https://github.com/katerinneramos/data-engineer-technical-test/blob/addProyect/4TechnicalTest/demo-dbt-proyect/demo_dbt_proyect/models/week_over_week_analytics_int.sql">Link to Intermediate Model: week_over_week_analytics_int.sql</a>
-<br>
+
+```SQL
+{{ config(
+    materialized = 'view'
+) }}
+
+WITH weekly_data AS (
+
+    SELECT
+        week_start_date as datetime_id,
+        SUM(sessions) AS sessions,
+        SUM(pageviews) AS pageviews,
+        SUM(users) AS users,
+        AVG(bounce_rate) AS bounce_rate,
+        AVG(conversion_rate) AS conversion_rate,
+        AVG(average_session_duration) AS average_session_duration,
+        devices,
+        country,
+        postal_co,
+        {{ dbt_utils.generate_surrogate_key(['country', 'postal_co']) }} as country_id,
+        campaign,
+        campaign_id
+    FROM
+        {{ ref('week_over_week_analytics_stg') }}
+    GROUP BY
+        week_start_date
+)
+SELECT
+    dt.datetime_id as week_start_date,
+    sessions,
+    pageviews,
+    users,
+    bounce_rate,
+    conversion_rate,
+    average_session_duration,
+    devices,
+    dd.devices_id,
+    country,
+    dc.country_id,
+    postal_co,
+    campaign,
+    dcamp.campaign_id
+FROM
+    weekly_data week
+INNER JOIN {{ ref('dim_datetime') }} dt ON week.datetime_id = dt.datetime_id
+INNER JOIN {{ ref('dim_country') }} dc ON week.country_id = dc.country_id
+INNER JOIN {{ ref('dim_devices') }} dd ON week.devices = dd.devices
+INNER JOIN {{ ref('dim_campaign') }} dcamp ON week.campaign_id = dcamp.campaign_id;
+
+```
 
 ### Final Model for Week-over-Week Metrics
 <a href = "https://github.com/katerinneramos/data-engineer-technical-test/blob/addProyect/4TechnicalTest/demo-dbt-proyect/demo_dbt_proyect/models/week_over_week_analytics.sql">Link to Final Model: week_over_week_analytics.sql</a>
-<br>
+
+```SQL
+{{ config(
+    materialized='table'
+) }}
+
+WITH weekly_data_lag AS (
+    SELECT
+        week_start_date,
+        sessions,
+        pageviews,
+        users,
+        bounce_rate,
+        conversion_rate,
+        average_session_duration,
+        LAG(sessions) OVER (ORDER BY week_start_date) AS prev_sessions,
+        LAG(pageviews) OVER (ORDER BY week_start_date) AS prev_pageviews,
+        LAG(users) OVER (ORDER BY week_start_date) AS prev_users,
+        LAG(bounce_rate) OVER (ORDER BY week_start_date) AS prev_bounce_rate,
+        LAG(conversion_rate) OVER (ORDER BY week_start_date) AS prev_conversion_rate,
+        LAG(average_session_duration) OVER (ORDER BY week_start_date) AS prev_avg_session_duration
+        devices,
+        devices_id,
+        country,
+        country_id,
+        postal_co,
+        campaign,
+        campaign_id
+        FROM
+            {{ ref('week_over_week_analytics_int') }}
+)
+
+SELECT
+    week_start_date,
+    sessions,
+    pageviews,
+    users,
+    bounce_rate,
+    conversion_rate,
+    average_session_duration,
+    prev_sessions,
+    prev_pageviews,
+    prev_users,
+    prev_bounce_rate,
+    prev_conversion_rate,
+    prev_avg_session_duration,
+    SAFE_DIVIDE(sessions - prev_sessions, prev_sessions) * 100 AS pct_change_sessions,
+    SAFE_DIVIDE(pageviews - prev_pageviews, prev_pageviews) * 100 AS pct_change_pageviews,
+    SAFE_DIVIDE(users - prev_users, prev_users) * 100 AS pct_change_users,
+    SAFE_DIVIDE(bounce_rate - prev_bounce_rate, prev_bounce_rate) * 100 AS pct_change_bounce_rate,
+    SAFE_DIVIDE(conversion_rate - prev_conversion_rate, prev_conversion_rate) * 100 AS pct_change_conversion_rate,
+    SAFE_DIVIDE(average_session_duration - prev_avg_session_duration, prev_avg_session_duration) * 100 AS pct_change_avg_session_duration
+    devices,
+    devices_id,
+    country,
+    country_id,
+    postal_co,
+    campaign,
+    campaign_id
+FROM
+    weekly_data_lag
+ORDER BY
+    week_start_date;
+
+```
 
 ### We can create dimension tables
 
 <a href = "https://github.com/katerinneramos/data-engineer-technical-test/blob/addProyect/4TechnicalTest/demo-dbt-proyect/demo_dbt_proyect/models/dim_device.sql">Link to dim_device</a>
 
+```SQL
+WITH device AS (
+ SELECT DISTINCT
+    GENERATE_UUID() as devices_id
+    ,devices AS devices
+ FROM 
+    {{ source('analytics', 'weekly_analytics_report') }}
+ WHERE 
+    devices IS NOT NULL
+)
+SELECT
+    devices_id
+    ,devices
+FROM 
+    device d;
+```
 
 <a href = "https://github.com/katerinneramos/data-engineer-technical-test/blob/addProyect/4TechnicalTest/demo-dbt-proyect/demo_dbt_proyect/models/dim_campaign.sql">Link to dim_campaign</a>
 
+```SQL
+WITH campaign AS (
+ SELECT DISTINCT
+    campaign_id
+    ,campaign AS campaign
+ FROM 
+    {{ source('analytics', 'weekly_analytics_report') }}
+ WHERE 
+    campaign IS NOT NULL
+)
+SELECT
+    camp.campaign_id
+    ,camp.campaign
+FROM 
+    campaign camp;
+```
+
 <a href = "https://github.com/katerinneramos/data-engineer-technical-test/blob/addProyect/4TechnicalTest/demo-dbt-proyect/demo_dbt_proyect/models/dim_country.sql">Link to dim_country</a>
 
+```SQL
+WITH country AS (
+ SELECT DISTINCT
+    {{ dbt_utils.generate_surrogate_key(['country', 'postal_co']) }} as country_id
+    ,country AS country
+ FROM 
+    {{ source('analytics', 'weekly_analytics_report') }}
+ WHERE 
+    country IS NOT NULL
+)
+SELECT
+    country_id
+    ,country
+FROM 
+    country c;
+```
 
 <a href = "https://github.com/katerinneramos/data-engineer-technical-test/blob/addProyect/4TechnicalTest/demo-dbt-proyect/demo_dbt_proyect/models/dim_calendar.sql">Link to dim_calendar</a>
-<br>
-<br>
+
+```SQL
+WITH datetime AS ( 
+ SELECT DISTINCT
+ week_start_date AS datetime_id,
+ CASE
+ WHEN LENGTH(week_start_date) = 16 THEN
+ - Date format: "DD/MM/YYYY HH:MM"
+ PARSE_DATETIME('%m/%d/%Y %H:%M', week_start_date)
+ WHEN LENGTH(week_start_date) <= 14 THEN
+ - Date format: "MM/DD/YY HH:MM"
+ PARSE_DATETIME('%m/%d/%y %H:%M', week_start_date)
+ ELSE
+ NULL
+ END AS date_part
+ FROM 
+    {{ source('analytics', 'weekly_analytics_report') }}
+ WHERE week_start_date IS NOT NULL
+)
+SELECT
+ datetime_id,
+ date_part as datetime,
+ EXTRACT(YEAR FROM date_part) AS year,
+ EXTRACT(MONTH FROM date_part) AS month,
+ EXTRACT(DAY FROM date_part) AS day,
+ EXTRACT(DAYOFWEEK FROM date_part) AS weekday
+FROM datetime;
+```
 
 #### For this we need to set up the profiles.yml file with your BigQuery configuration:
 
@@ -266,7 +494,187 @@ demo_dbt_proyect:
 
 #### And configure the schema.yml as follow:
 <a href = "https://github.com/katerinneramos/data-engineer-technical-test/blob/addProyect/4TechnicalTest/demo-dbt-proyect/demo_dbt_proyect/models/schema.yml">Link to schema.yml</a>
-<br>
+
+```YAML
+version: 2
+
+models:
+  - name: week_over_week_analytics_stg
+    description: "Week Analytics Stage"
+    columns:
+      - name: sessions
+        description: ""
+
+      - name: week_start_date
+        description: ""
+
+      - name: average_session_duration
+        description: ""
+
+      - name: pageviews
+        description: ""
+
+      - name: users
+        description: ""
+
+      - name: bounce_rate
+        description: ""
+
+      - name: conversion_rate
+        description: ""
+
+      - name: devices
+        description: ""
+
+      - name: country
+        description: ""
+
+      - name: postal_co
+        description: ""
+
+      - name: campaign
+        description: ""
+
+      - name: campaign_id
+        description: ""
+
+  - name: week_over_week_analytics_int
+    description: "Week Analytics Intermediate"
+    columns:
+      - name: sessions
+        description: ""
+
+      - name: week_start_date
+        description: ""
+
+      - name: average_session_duration
+        description: ""
+
+      - name: pageviews
+        description: ""
+
+      - name: users
+        description: ""
+
+      - name: bounce_rate
+        description: ""
+
+      - name: conversion_rate
+        description: ""
+
+      - name: devices
+        description: ""
+
+      - name: devices_id
+        description: ""
+
+      - name: country_id
+        description: ""
+
+      - name: country
+        description: ""
+
+      - name: postal_co
+        description: ""
+
+      - name: campaign
+        description: ""
+
+      - name: campaign_id
+        description: ""
+
+  - name: week_over_week_analytics
+    description: "Week Analytics Final Table"
+    columns:
+      - name: sessions
+        description: ""
+
+      - name: week_start_date
+        description: ""
+
+      - name: average_session_duration
+        description: ""
+
+      - name: pageviews
+        description: ""
+
+      - name: users
+        description: ""
+
+      - name: bounce_rate
+        description: ""
+
+      - name: conversion_rate
+        description: ""
+
+      - name: devices
+        description: ""
+
+      - name: devices_id
+        description: ""
+
+      - name: country_id
+        description: ""
+
+      - name: country
+        description: ""
+
+      - name: postal_co
+        description: ""
+
+      - name: campaign
+        description: ""
+
+      - name: campaign_id
+        description: ""
+
+      - name: prev_sessions
+        description: ""
+
+      - name: prev_pageviews
+        description: ""
+
+      - name: prev_users
+        description: ""
+
+      - name: prev_bounce_rate
+        description: ""
+
+      - name: prev_conversion_rate
+        description: ""
+
+      - name: prev_avg_session_duration
+        description: ""
+
+      - name: pct_change_sessions
+        description: ""
+
+      - name: pct_change_pageviews
+        description: ""
+
+      - name: pct_change_users
+        description: ""
+
+      - name: pct_change_bounce_rate
+        description: ""
+
+      - name: pct_change_conversion_rate
+        description: ""
+
+      - name: pct_change_avg_session_duration
+        description: ""
+
+```
 
 #### And configure de source.yml
 <a href = "https://github.com/katerinneramos/data-engineer-technical-test/blob/addProyect/4TechnicalTest/demo-dbt-proyect/demo_dbt_proyect/models/source.yml">Link to source.yml</a>
+
+```YAML
+version: 2
+
+sources:
+  - name: analytics-report
+    tables:
+      - name: weekly_analytics_report
+
+```
