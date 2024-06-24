@@ -62,6 +62,7 @@ File path in Cloud Composer:<br>
 from airflow import DAG
 from airflow.utils.dates import days_ago
 from airflow.operators.python_operator import PythonOperator
+from airflow.providers.google.cloud.operators.bigquery import BigQueryCreateEmptyTableOperator, BigQueryInsertJobOperator
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from google.cloud import bigquery
@@ -89,8 +90,10 @@ dag = DAG(
 # Function to create the table in BigQuery if it doesn't exist
 def create_table():
     client = bigquery.Client()
-    table_id = 'demo-dbt-project.analytics-report.weekly_analytics_report'
-
+    table_id = 'weekly_analytics_report',
+    dataset_id='analytics-report'
+    task_id='create_table',
+    project_id = 'demo-dbt-project',
     schema = [
         bigquery.SchemaField("week_start_date", "DATE"),
         bigquery.SchemaField("sessions", "INTEGER"),
@@ -113,7 +116,7 @@ def create_table():
         print(f"Table {table_id} already exists.")
     except Exception:
         table = client.create_table(table)
-        print(f"Created table {table.project}.{table.dataset_id}.{table.table_id}")
+        print(f"Created table {table.project_id}.{table.dataset_id}.{table.table_id}")
 
 # Function to extract data from Google Analytics and load to BigQuery
 def extract_load():
@@ -190,7 +193,7 @@ def extract_load():
 
     # Load data into BigQuery
     client = bigquery.Client()
-    table_id = 'demo-dbt-project.analytics-report.weekly_analytics_report'
+    table_id = 'weekly_analytics_report'
     errors = client.insert_rows_json(table_id, rows)
 
     if errors:
