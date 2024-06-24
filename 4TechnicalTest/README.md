@@ -26,7 +26,7 @@ week-over-week metrics. Store the results in a separate table. <br>
 
 ## Data Extraction
 
-![DiagramGA-Composer-BQ.png](attachment:521ccbb9-aacd-4ce7-ac5e-2ac1f6cbb151.png) <br>
+![DiagramGA-Composer-BQ.png](attachment:521ccbb9-aacd-4ce7-ac5e-2ac1f6cbb151.png) 
 
 #### Authentication and Access
 To extract data from the Google Analytics API, we'll need to set up authentication and authorize the application: <br>
@@ -56,6 +56,128 @@ File path in Cloud Composer:<br>
 <a href = "https://github.com/katerinneramos/data-engineer-technical-test/blob/addProyect/4TechnicalTest/etl_google_analytics_to_bigquery.py">Link to etl_google_analytics_to_bigquery.py</a>
 <br>
 
+```PYTHON
+# etl_google_analytics_to_bigquery.py
+from airflow import DAG
+from airflow.utils.dates import days_ago
+from airflow.operators.python_operator import PythonOperator
+from google.oauth2 import service_account
+from googleapiclient.discovery import build
+from google.cloud import bigquery
+from datetime import datetime, timedelta
+
+# Define default arguments
+default_args = {
+    'owner': 'airflow',
+    'depends_on_past': False,
+    'email_on_failure': False,
+    'email_on_retry': False,
+    'retries': 1,
+}
+
+# Define the DAG
+dag = DAG(
+    'etl_google_analytics_to_bigquery',
+    default_args=default_args,
+    description='ETL pipeline for Google Analytics to BigQuery',
+    schedule_interval='@weekly',  # Run once a week
+    start_date=days_ago(1),
+    catchup=False,
+)
+
+# Function to extract data from Google Analytics and load to BigQuery
+def extract_load():
+    SCOPES = ['https://www.googleapis.com/auth/analytics.readonly']
+    SERVICE_ACCOUNT_FILE = '/path/to/service-account-file.json'
+    credentials = service_account.Credentials.from_service_account_file(
+        SERVICE_ACCOUNT_FILE, scopes=SCOPES)
+    
+    # Initialize Analytics Reporting API
+    analytics = build('analyticsreporting', 'v4', credentials=credentials)
+
+    # Define the date range (last 7 days)
+    date_range = {
+        'startDate': '7daysAgo',
+        'endDate': 'yesterday'
+    }
+
+    # Define the metrics and dimensions
+    metrics = [
+        {'expression': 'ga:sessions'},
+        {'expression': 'ga:pageviews'},
+        {'expression': 'ga:users'},
+        {'expression': 'ga:bounceRate'},
+        {'expression': 'ga:conversionRate'},
+        {'expression': 'ga:average_session_duration'}
+    ]
+    dimensions = [
+        {'name': 'ga:date'},
+        {'name': 'ga:devices'},
+        {'name': 'ga:country'}
+        {'name': 'ga:postal_co'}
+        {'name': 'ga:campaign'}
+        {'name': 'ga:campaign_id'}
+    ]
+
+    # Make the API request
+    request = analytics.reports().batchGet(
+        body={
+            'reportRequests': [
+                {
+                    'viewId': 'YOUR_VIEW_ID',
+                    'dateRanges': [date_range],
+                    'metrics': metrics,
+                    'dimensions': dimensions
+                }]
+        }
+    ).execute()
+
+    # Process the request and transform data for BigQuery
+    rows = []
+    for report in request.get('reports', []):
+        for row in report.get('data', {}).get('rows', []):
+            date = row.get('dimensions', [])[0]
+            devices = row.get('dimensions', [])[1]
+            country = row.get('dimensions', [])[2]
+            postal_co = row.get('dimensions', [])[3]
+            campaign = row.get('dimensions', [])[4]
+            campaign_id = row.get('dimensions', [])[5]
+            metrics_data = row.get('metrics', [])[0].get('values', [])
+            rows.append({
+                'week_start_date': date,
+                'sessions': int(metrics_data[0]),
+                'pageviews': int(metrics_data[1]),
+                'users': int(metrics_data[2]),
+                'bounce_rate': float(metrics_data[3]),
+                'conversion_rate': float(metrics_data[4]),
+                'devices': devices,
+                'country': country,
+                'postal_co': postal_co,
+                'campaign': campaign,
+                'campaign_id': campaign_id,
+                'average_session_duration': float(metrics_data[5])
+            })
+
+    # Load data into BigQuery
+    client = bigquery.Client()
+    table_id = 'demo-dbt-project.analytics-report.weekly_analytics_report'
+    errors = client.insert_rows_json(table_id, rows)
+
+    if errors:
+        print(f'Encountered errors while inserting rows: {errors}')
+    else:
+        print('Rows successfully inserted.')
+
+# Define the PythonOperator to run the extract_load function
+run_etl = PythonOperator(
+    task_id='run_etl',
+    python_callable=extract_load,
+    dag=dag,
+)
+
+run_etl
+```
+
 #### Cloud Composer’s implementation
 - ##### Upload the file to the DAG directory:
 Upload etl_google_analytics_to_bigquery.py to the Cloud Storage bucket associated with your Cloud Composer environment.
@@ -74,6 +196,23 @@ Table to store the etl_google_analytics_to_bigquery <br>
 
 <a href = "https://github.com/katerinneramos/data-engineer-technical-test/blob/addProyect/4TechnicalTest/weekly_analytics_report.sql">Link to Create Table Query: weekly_analytics_report.sql</a>
 <br>
+
+```SQL
+CREATE TABLE `demo-dbt-project.analytics-report.weekly_analytics_report` (
+    week_start_date DATE OPTIONS(description="The starting date of the week")
+    ,sessions INT64 OPTIONS(description="Total number of sessions")
+    ,pageviews INT64 OPTIONS(description="Total number of pageviews")
+    ,users INT64 OPTIONS(description="Total number of unique users")
+    ,bounce_rate FLOAT64 OPTIONS(description="Percentage of single-page sessions")
+    ,conversion_rate FLOAT64 OPTIONS(description="Rate of goal conversions")
+    ,devices STRING OPTIONS(description="Types of devices used by users")
+    ,country STRING OPTIONS(description="Geographical location of users")
+    ,postal_co STRING OPTIONS(description="Postal Code")
+    ,campaign STRING OPTIONS(description="Campaign Name")
+    ,campaign_id STRING OPTIONS(description="Campaign ID")
+    ,average_session_duration FLOAT64 OPTIONS(description="Average duration of sessions in seconds")
+);
+```
 
 ### Using dbt for Data Modeling
 We'll use DBT for data modeling and automating the data transformation process. <br> 
@@ -94,26 +233,21 @@ We create an staging, intermediate and final model.
 
 ### We can create dimension tables
 
-### dim_devices
-<a href = "https://github.com/katerinneramos/data-engineer-technical-test/blob/addProyect/4TechnicalTest/demo-dbt-proyect/demo_dbt_proyect/models/dim_device.sql">Link to dim_devices</a>
-<br>
+<a href = "https://github.com/katerinneramos/data-engineer-technical-test/blob/addProyect/4TechnicalTest/demo-dbt-proyect/demo_dbt_proyect/models/dim_device.sql">Link to dim_device</a>
 
-### dim_campaign
 
 <a href = "https://github.com/katerinneramos/data-engineer-technical-test/blob/addProyect/4TechnicalTest/demo-dbt-proyect/demo_dbt_proyect/models/dim_campaign.sql">Link to dim_campaign</a>
-<br>
 
-### dim_country
 <a href = "https://github.com/katerinneramos/data-engineer-technical-test/blob/addProyect/4TechnicalTest/demo-dbt-proyect/demo_dbt_proyect/models/dim_country.sql">Link to dim_country</a>
-<br>
 
-### dim_calendar
+
 <a href = "https://github.com/katerinneramos/data-engineer-technical-test/blob/addProyect/4TechnicalTest/demo-dbt-proyect/demo_dbt_proyect/models/dim_calendar.sql">Link to dim_calendar</a>
 <br>
 <br>
 
 #### For this we need to set up the profiles.yml file with your BigQuery configuration:
 
+```YAML
 demo_dbt_proyect:
   outputs:
     dev:
@@ -127,6 +261,7 @@ demo_dbt_proyect:
       threads: 2
       type: bigquery
   target: dev
+```
 <br>
 
 #### And configure the schema.yml as follow:
