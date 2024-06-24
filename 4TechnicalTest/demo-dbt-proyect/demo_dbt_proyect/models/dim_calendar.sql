@@ -12,7 +12,7 @@ WITH datetime AS (
  NULL
  END AS date_part
  FROM 
-    {{ source('analytics', 'weekly_analytics_report') }}
+    {{ source('analytics_report', 'weekly_analytics_report') }}
  WHERE week_start_date IS NOT NULL
 )
 SELECT

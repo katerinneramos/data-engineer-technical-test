@@ -3,7 +3,7 @@ WITH device AS (
     GENERATE_UUID() as devices_id
     ,devices AS devices
  FROM 
-    {{ source('analytics', 'weekly_analytics_report') }}
+    {{ source('analytics_report', 'weekly_analytics_report') }}
  WHERE 
     devices IS NOT NULL
 )

@@ -221,13 +221,103 @@ CREATE TABLE `demo-dbt-project.analytics-report.weekly_analytics_report` (
 We'll use DBT for data modeling and automating the data transformation process. <br> 
 We need to define dbt models to handle the extraction and transformation of data, and then calculate the week-over-week metrics. <br>
 
+
+### We create dimension tables
+
+<a href = "https://github.com/katerinneramos/data-engineer-technical-test/blob/addProyect/4TechnicalTest/demo-dbt-proyect/demo_dbt_proyect/models/dim_device.sql">Link to dim_device</a>
+
+```SQL
+WITH device AS (
+ SELECT DISTINCT
+    GENERATE_UUID() as devices_id
+    ,devices AS devices
+ FROM 
+    {{ source('analytics_report', 'weekly_analytics_report') }}
+ WHERE 
+    devices IS NOT NULL
+)
+SELECT
+    devices_id
+    ,devices
+FROM 
+    device d;
+```
+
+<a href = "https://github.com/katerinneramos/data-engineer-technical-test/blob/addProyect/4TechnicalTest/demo-dbt-proyect/demo_dbt_proyect/models/dim_campaign.sql">Link to dim_campaign</a>
+
+```SQL
+WITH campaign AS (
+ SELECT DISTINCT
+    campaign_id
+    ,campaign AS campaign
+ FROM 
+    {{ source('analytics_report', 'weekly_analytics_report') }}
+ WHERE 
+    campaign IS NOT NULL
+)
+SELECT
+    camp.campaign_id
+    ,camp.campaign
+FROM 
+    campaign camp;
+```
+
+<a href = "https://github.com/katerinneramos/data-engineer-technical-test/blob/addProyect/4TechnicalTest/demo-dbt-proyect/demo_dbt_proyect/models/dim_country.sql">Link to dim_country</a>
+
+```SQL
+WITH country AS (
+ SELECT DISTINCT
+    {{ dbt_utils.generate_surrogate_key(['country', 'postal_co']) }} as country_id
+    ,country AS country
+ FROM 
+    {{ source('analytics_report', 'weekly_analytics_report') }}
+ WHERE 
+    country IS NOT NULL
+)
+SELECT
+    country_id
+    ,country
+FROM 
+    country c;
+```
+
+<a href = "https://github.com/katerinneramos/data-engineer-technical-test/blob/addProyect/4TechnicalTest/demo-dbt-proyect/demo_dbt_proyect/models/dim_calendar.sql">Link to dim_calendar</a>
+
+```SQL
+WITH datetime AS ( 
+ SELECT DISTINCT
+ week_start_date AS datetime_id,
+ CASE
+ WHEN LENGTH(week_start_date) = 16 THEN
+ - Date format: "DD/MM/YYYY HH:MM"
+ PARSE_DATETIME('%m/%d/%Y %H:%M', week_start_date)
+ WHEN LENGTH(week_start_date) <= 14 THEN
+ - Date format: "MM/DD/YY HH:MM"
+ PARSE_DATETIME('%m/%d/%y %H:%M', week_start_date)
+ ELSE
+ NULL
+ END AS date_part
+ FROM 
+    {{ source('analytics_report', 'weekly_analytics_report') }}
+ WHERE week_start_date IS NOT NULL
+)
+SELECT
+ datetime_id,
+ date_part as datetime,
+ EXTRACT(YEAR FROM date_part) AS year,
+ EXTRACT(MONTH FROM date_part) AS month,
+ EXTRACT(DAY FROM date_part) AS day,
+ EXTRACT(DAYOFWEEK FROM date_part) AS weekday
+FROM datetime;
+```
+
 We create an staging, intermediate and final model.
 ### Staging Model
 <a href = "https://github.com/katerinneramos/data-engineer-technical-test/blob/addProyect/4TechnicalTest/demo-dbt-proyect/demo_dbt_proyect/models/week_over_week_analytics_stg.sql">Link to Staging Model: week_over_week_analytics_stg.sql</a>
 
 ```SQL
 {{ config(
-    materialized = 'view'
+    materialized = 'table'
 ) }}
 
 WITH source AS (
@@ -271,7 +361,7 @@ FROM
 
 ```SQL
 {{ config(
-    materialized = 'view'
+    materialized = 'table'
 ) }}
 
 WITH weekly_data AS (
@@ -385,95 +475,6 @@ FROM
 ORDER BY
     week_start_date;
 
-```
-
-### We create dimension tables
-
-<a href = "https://github.com/katerinneramos/data-engineer-technical-test/blob/addProyect/4TechnicalTest/demo-dbt-proyect/demo_dbt_proyect/models/dim_device.sql">Link to dim_device</a>
-
-```SQL
-WITH device AS (
- SELECT DISTINCT
-    GENERATE_UUID() as devices_id
-    ,devices AS devices
- FROM 
-    {{ source('analytics', 'weekly_analytics_report') }}
- WHERE 
-    devices IS NOT NULL
-)
-SELECT
-    devices_id
-    ,devices
-FROM 
-    device d;
-```
-
-<a href = "https://github.com/katerinneramos/data-engineer-technical-test/blob/addProyect/4TechnicalTest/demo-dbt-proyect/demo_dbt_proyect/models/dim_campaign.sql">Link to dim_campaign</a>
-
-```SQL
-WITH campaign AS (
- SELECT DISTINCT
-    campaign_id
-    ,campaign AS campaign
- FROM 
-    {{ source('analytics', 'weekly_analytics_report') }}
- WHERE 
-    campaign IS NOT NULL
-)
-SELECT
-    camp.campaign_id
-    ,camp.campaign
-FROM 
-    campaign camp;
-```
-
-<a href = "https://github.com/katerinneramos/data-engineer-technical-test/blob/addProyect/4TechnicalTest/demo-dbt-proyect/demo_dbt_proyect/models/dim_country.sql">Link to dim_country</a>
-
-```SQL
-WITH country AS (
- SELECT DISTINCT
-    {{ dbt_utils.generate_surrogate_key(['country', 'postal_co']) }} as country_id
-    ,country AS country
- FROM 
-    {{ source('analytics', 'weekly_analytics_report') }}
- WHERE 
-    country IS NOT NULL
-)
-SELECT
-    country_id
-    ,country
-FROM 
-    country c;
-```
-
-<a href = "https://github.com/katerinneramos/data-engineer-technical-test/blob/addProyect/4TechnicalTest/demo-dbt-proyect/demo_dbt_proyect/models/dim_calendar.sql">Link to dim_calendar</a>
-
-```SQL
-WITH datetime AS ( 
- SELECT DISTINCT
- week_start_date AS datetime_id,
- CASE
- WHEN LENGTH(week_start_date) = 16 THEN
- - Date format: "DD/MM/YYYY HH:MM"
- PARSE_DATETIME('%m/%d/%Y %H:%M', week_start_date)
- WHEN LENGTH(week_start_date) <= 14 THEN
- - Date format: "MM/DD/YY HH:MM"
- PARSE_DATETIME('%m/%d/%y %H:%M', week_start_date)
- ELSE
- NULL
- END AS date_part
- FROM 
-    {{ source('analytics', 'weekly_analytics_report') }}
- WHERE week_start_date IS NOT NULL
-)
-SELECT
- datetime_id,
- date_part as datetime,
- EXTRACT(YEAR FROM date_part) AS year,
- EXTRACT(MONTH FROM date_part) AS month,
- EXTRACT(DAY FROM date_part) AS day,
- EXTRACT(DAYOFWEEK FROM date_part) AS weekday
-FROM datetime;
 ```
 
 #### For this we need to set up the profiles.yml file with BigQuery configuration:

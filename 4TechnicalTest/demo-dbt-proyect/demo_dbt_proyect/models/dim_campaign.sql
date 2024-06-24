@@ -3,7 +3,7 @@ WITH campaign AS (
     campaign_id
     ,campaign AS campaign
  FROM 
-    {{ source('analytics', 'weekly_analytics_report') }}
+    {{ source('analytics_report', 'weekly_analytics_report') }}
  WHERE 
     campaign IS NOT NULL
 )
