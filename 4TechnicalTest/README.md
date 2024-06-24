@@ -86,6 +86,35 @@ dag = DAG(
     catchup=False,
 )
 
+# Function to create the table in BigQuery if it doesn't exist
+def create_table():
+    client = bigquery.Client()
+    table_id = 'demo-dbt-project.analytics-report.weekly_analytics_report'
+
+    schema = [
+        bigquery.SchemaField("week_start_date", "DATE"),
+        bigquery.SchemaField("sessions", "INTEGER"),
+        bigquery.SchemaField("pageviews", "INTEGER"),
+        bigquery.SchemaField("users", "INTEGER"),
+        bigquery.SchemaField("bounce_rate", "FLOAT"),
+        bigquery.SchemaField("conversion_rate", "FLOAT"),
+        bigquery.SchemaField("average_session_duration", "FLOAT"),
+        bigquery.SchemaField("devices", "STRING"),
+        bigquery.SchemaField("country", "STRING"),
+        bigquery.SchemaField("postal_co", "STRING"),
+        bigquery.SchemaField("campaign", "STRING"),
+        bigquery.SchemaField("campaign_id", "STRING"),
+    ]
+
+    table = bigquery.Table(table_id, schema=schema)
+
+    try:
+        client.get_table(table_id)
+        print(f"Table {table_id} already exists.")
+    except Exception:
+        table = client.create_table(table)
+        print(f"Created table {table.project}.{table.dataset_id}.{table.table_id}")
+
 # Function to extract data from Google Analytics and load to BigQuery
 def extract_load():
     SCOPES = ['https://www.googleapis.com/auth/analytics.readonly']
@@ -169,14 +198,21 @@ def extract_load():
     else:
         print('Rows successfully inserted.')
 
+# Define the PythonOperator to create the table
+create_table_op = PythonOperator(
+    task_id='create_table',
+    python_callable=create_table,
+    dag=dag,
+)
+
 # Define the PythonOperator to run the extract_load function
 run_etl = PythonOperator(
     task_id='run_etl',
     python_callable=extract_load,
     dag=dag,
 )
-
-run_etl
+# Task dependencies
+create_table_op >> run_etl
 ```
 
 #### Cloud Composer’s implementation
@@ -201,7 +237,7 @@ Table to store the etl_google_analytics_to_bigquery <br>
 <br>
 
 ```SQL
-CREATE TABLE `demo-dbt-project.analytics-report.weekly_analytics_report` (
+CREATE OR REPLACE TABLE `demo-dbt-project.analytics-report.weekly_analytics_report` (
     week_start_date DATE OPTIONS(description="The starting date of the week")
     ,sessions INT64 OPTIONS(description="Total number of sessions")
     ,pageviews INT64 OPTIONS(description="Total number of pageviews")
@@ -215,6 +251,37 @@ CREATE TABLE `demo-dbt-project.analytics-report.weekly_analytics_report` (
     ,campaign_id STRING OPTIONS(description="Campaign ID")
     ,average_session_duration FLOAT64 OPTIONS(description="Average duration of sessions in seconds")
 );
+
+-- Table with calcultated metrics (calculadas en dbt Data Model)
+CREATE OR REPLACE TABLE `demo-dbt-project.analytics-report.week_over_week_analytics` (
+    week_start_date DATE OPTIONS(description="The starting date of the week")
+    ,sessions INT64 OPTIONS(description="Total number of sessions")
+    ,pageviews INT64 OPTIONS(description="Total number of pageviews")
+    ,users INT64 OPTIONS(description="Total number of unique users")
+    ,bounce_rate FLOAT64 OPTIONS(description="Percentage of single-page sessions")
+    ,conversion_rate FLOAT64 OPTIONS(description="Rate of goal conversions")
+    ,average_session_duration FLOAT64 OPTIONS(description="Average duration of sessions in seconds")
+    ,devices STRING OPTIONS(description="Types of devices used by users")
+    ,devices_id STRING OPTIONS(description="Types of devices used by users")
+    ,country STRING OPTIONS(description="Geographical location of users")
+    ,country_id STRING OPTIONS(description="Geographical location of users")
+    ,postal_co STRING OPTIONS(description="Postal Code")
+    ,campaign STRING OPTIONS(description="Campaign Name")
+    ,campaign_id STRING OPTIONS(description="Campaign ID")
+    ,prev_sessions FLOAT64 OPTIONS(description="")
+    ,prev_pageviews FLOAT64 OPTIONS(description="")
+    ,prev_users FLOAT64 OPTIONS(description="")
+    ,prev_bounce_rate FLOAT64 OPTIONS(description="")
+    ,prev_avg_session_duration FLOAT64 OPTIONS(description="")
+    ,pct_change_sessions FLOAT64 OPTIONS(description="")
+    ,pct_change_pageviews FLOAT64 OPTIONS(description="")
+    ,pct_change_users FLOAT64 OPTIONS(description="")
+    ,pct_change_bounce_rate FLOAT64 OPTIONS(description="")
+    ,pct_change_conversion_rate FLOAT64 OPTIONS(description="")
+    ,pct_change_avg_session_duration FLOAT64 OPTIONS(description="")
+);
+
+
 ```
 
 ## Using dbt for Data Modeling
