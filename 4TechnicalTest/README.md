@@ -192,6 +192,8 @@ Monitors the execution of the DAG to verify that data is correctly extracted and
 Table to store the etl_google_analytics_to_bigquery <br>
 <br>
 
+![week_over_week-analytics.png](https://github.com/katerinneramos/data-engineer-technical-test/blob/addProyect/4TechnicalTest/week_over_week-analytics.png?raw=true)
+
 ![week_over_week-analytics.png](attachment:0bb5e4a6-0c04-41c7-93e6-4c144736e63d.png)
 
 <a href = "https://github.com/katerinneramos/data-engineer-technical-test/blob/addProyect/4TechnicalTest/weekly_analytics_report.sql">Link to Create Table Query: weekly_analytics_report.sql</a>
