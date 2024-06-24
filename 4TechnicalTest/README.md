@@ -217,7 +217,7 @@ CREATE TABLE `demo-dbt-project.analytics-report.weekly_analytics_report` (
 );
 ```
 
-### Using dbt for Data Modeling
+## Using dbt for Data Modeling
 We'll use DBT for data modeling and automating the data transformation process. <br> 
 We need to define dbt models to handle the extraction and transformation of data, and then calculate the week-over-week metrics. <br>
 
