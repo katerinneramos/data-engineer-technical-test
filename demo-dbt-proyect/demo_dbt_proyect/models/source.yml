@@ -1,0 +1,6 @@
+version: 2
+
+sources:
+  - name: analytics
+    tables:
+      - name: weekly_analytics_report

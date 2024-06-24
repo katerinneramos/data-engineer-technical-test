@@ -1,0 +1,29 @@
+version: 2
+
+models:
+  - name: week_over_week_analytics_stg
+    description: "Week Analytics Stage"
+    columns:
+      - name: id
+        description: "The primary key for this table"
+        data_tests:
+          - unique
+          - not_null
+
+  - name: week_over_week_analytics_int
+    description: "Week Analytics Intermediate"
+    columns:
+      - name: id
+        description: "The primary key for this table"
+        data_tests:
+          - unique
+          - not_null
+
+  - name: week_over_week_analytics
+    description: "Week Analytics Intermediate"
+    columns:
+      - name: id
+        description: "The primary key for this table"
+        data_tests:
+          - unique
+          - not_null
