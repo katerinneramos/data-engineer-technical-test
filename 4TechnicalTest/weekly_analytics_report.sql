@@ -1,4 +1,4 @@
-CREATE TABLE `demo-dbt-project.analytics-report.weekly_analytics_report` (
+CREATE OR REPLACE TABLE `demo-dbt-project.analytics-report.weekly_analytics_report` (
     week_start_date DATE OPTIONS(description="The starting date of the week")
     ,sessions INT64 OPTIONS(description="Total number of sessions")
     ,pageviews INT64 OPTIONS(description="Total number of pageviews")
@@ -12,3 +12,33 @@ CREATE TABLE `demo-dbt-project.analytics-report.weekly_analytics_report` (
     ,campaign_id STRING OPTIONS(description="Campaign ID")
     ,average_session_duration FLOAT64 OPTIONS(description="Average duration of sessions in seconds")
 );
+
+-- Table with calcultaed metrics (calculadas en dbt Data Model)
+CREATE OR REPLACE TABLE `demo-dbt-project.analytics-report.week_over_week_analytics` (
+    week_start_date DATE OPTIONS(description="The starting date of the week")
+    ,sessions INT64 OPTIONS(description="Total number of sessions")
+    ,pageviews INT64 OPTIONS(description="Total number of pageviews")
+    ,users INT64 OPTIONS(description="Total number of unique users")
+    ,bounce_rate FLOAT64 OPTIONS(description="Percentage of single-page sessions")
+    ,conversion_rate FLOAT64 OPTIONS(description="Rate of goal conversions")
+    ,average_session_duration FLOAT64 OPTIONS(description="Average duration of sessions in seconds")
+    ,devices STRING OPTIONS(description="Types of devices used by users")
+    ,devices_id STRING OPTIONS(description="Types of devices used by users")
+    ,country STRING OPTIONS(description="Geographical location of users")
+    ,country_id STRING OPTIONS(description="Geographical location of users")
+    ,postal_co STRING OPTIONS(description="Postal Code")
+    ,campaign STRING OPTIONS(description="Campaign Name")
+    ,campaign_id STRING OPTIONS(description="Campaign ID")
+    ,prev_sessions FLOAT64 OPTIONS(description="")
+    ,prev_pageviews FLOAT64 OPTIONS(description="")
+    ,prev_users FLOAT64 OPTIONS(description="")
+    ,prev_bounce_rate FLOAT64 OPTIONS(description="")
+    ,prev_avg_session_duration FLOAT64 OPTIONS(description="")
+    ,pct_change_sessions FLOAT64 OPTIONS(description="")
+    ,pct_change_pageviews FLOAT64 OPTIONS(description="")
+    ,pct_change_users FLOAT64 OPTIONS(description="")
+    ,pct_change_bounce_rate FLOAT64 OPTIONS(description="")
+    ,pct_change_conversion_rate FLOAT64 OPTIONS(description="")
+    ,pct_change_avg_session_duration FLOAT64 OPTIONS(description="")
+);
+

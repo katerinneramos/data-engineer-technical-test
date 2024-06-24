@@ -26,6 +26,35 @@ dag = DAG(
     catchup=False,
 )
 
+# Function to create the table in BigQuery if it doesn't exist
+def create_table():
+    client = bigquery.Client()
+    table_id = 'demo-dbt-project.analytics-report.weekly_analytics_report'
+
+    schema = [
+        bigquery.SchemaField("week_start_date", "DATE"),
+        bigquery.SchemaField("sessions", "INTEGER"),
+        bigquery.SchemaField("pageviews", "INTEGER"),
+        bigquery.SchemaField("users", "INTEGER"),
+        bigquery.SchemaField("bounce_rate", "FLOAT"),
+        bigquery.SchemaField("conversion_rate", "FLOAT"),
+        bigquery.SchemaField("average_session_duration", "FLOAT"),
+        bigquery.SchemaField("devices", "STRING"),
+        bigquery.SchemaField("country", "STRING"),
+        bigquery.SchemaField("postal_co", "STRING"),
+        bigquery.SchemaField("campaign", "STRING"),
+        bigquery.SchemaField("campaign_id", "STRING"),
+    ]
+
+    table = bigquery.Table(table_id, schema=schema)
+
+    try:
+        client.get_table(table_id)
+        print(f"Table {table_id} already exists.")
+    except Exception:
+        table = client.create_table(table)
+        print(f"Created table {table.project}.{table.dataset_id}.{table.table_id}")
+
 # Function to extract data from Google Analytics and load to BigQuery
 def extract_load():
     SCOPES = ['https://www.googleapis.com/auth/analytics.readonly']
@@ -109,11 +138,18 @@ def extract_load():
     else:
         print('Rows successfully inserted.')
 
+# Define the PythonOperator to create the table
+create_table_op = PythonOperator(
+    task_id='create_table',
+    python_callable=create_table,
+    dag=dag,
+)
+
 # Define the PythonOperator to run the extract_load function
 run_etl = PythonOperator(
     task_id='run_etl',
     python_callable=extract_load,
     dag=dag,
 )
-
-run_etl
+# Task dependencies
+create_table_op >> run_etl
