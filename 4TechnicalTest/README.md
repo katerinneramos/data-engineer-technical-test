@@ -25,8 +25,7 @@ week-over-week metrics. Store the results in a separate table. <br>
 
 
 ## Data Extraction
-
-![DiagramGA-Composer-BQ.png](attachment:521ccbb9-aacd-4ce7-ac5e-2ac1f6cbb151.png) 
+![DiagramGA-Composer-BQ.png](https://github.com/katerinneramos/data-engineer-technical-test/blob/addProyect/4TechnicalTest/DiagramGA-Composer-BQ.pngraw=true)
 
 #### Authentication and Access
 To extract data from the Google Analytics API, we'll need to set up authentication and authorize the application: <br>
@@ -39,6 +38,7 @@ To extract data from the Google Analytics API, we'll need to set up authenticati
 - Grant the service account access to the Google Analytics view. <br>
 - Download the JSON key file for the service account. <br>
 <br>
+
 ## Data Pipeline
 To automate the execution of the ETL we’ll use Google Cloud Composer so that it runs weekly, we’ll follow these steps: <br>
 - ##### Configure Cloud Composer: 
@@ -188,13 +188,13 @@ Verify that the etl_google_analytics_to_bigquery DAG is listed and enabled.
 - ##### Run and monitor the DAG:
 Monitors the execution of the DAG to verify that data is correctly extracted and loaded into BigQuery.
 
+<br>
+
 ## Data Modeling
 Table to store the etl_google_analytics_to_bigquery <br>
 <br>
 
 ![week_over_week-analytics.png](https://github.com/katerinneramos/data-engineer-technical-test/blob/addProyect/4TechnicalTest/week_over_week-analytics.png?raw=true)
-
-![week_over_week-analytics.png](attachment:0bb5e4a6-0c04-41c7-93e6-4c144736e63d.png)
 
 <a href = "https://github.com/katerinneramos/data-engineer-technical-test/blob/addProyect/4TechnicalTest/weekly_analytics_report.sql">Link to Create Table Query: weekly_analytics_report.sql</a>
 <br>
@@ -386,7 +386,7 @@ ORDER BY
 
 ```
 
-### We can create dimension tables
+### We create dimension tables
 
 <a href = "https://github.com/katerinneramos/data-engineer-technical-test/blob/addProyect/4TechnicalTest/demo-dbt-proyect/demo_dbt_proyect/models/dim_device.sql">Link to dim_device</a>
 
@@ -475,7 +475,7 @@ SELECT
 FROM datetime;
 ```
 
-#### For this we need to set up the profiles.yml file with your BigQuery configuration:
+#### For this we need to set up the profiles.yml file with BigQuery configuration:
 
 ```YAML
 demo_dbt_proyect:
@@ -679,4 +679,10 @@ sources:
     tables:
       - name: weekly_analytics_report
 
+```
+
+#### Finally, run the dbt commands
+
+```CMD
+dbt run
 ```
