@@ -26,7 +26,7 @@ week-over-week metrics. Store the results in a separate table. <br>
 
 ## Data Extraction
 
-![DiagramGA-Composer-BQ.png](https://github.com/katerinneramos/data-engineer-technical-test/blob/addProyect/4TechnicalTest/DiagramGA-Composer-BQ.png?raw=true)
+![DiagramGA-Composer-BQ.png](https://github.com/katerinneramos/data-engineer-technical-test/blob/main/4TechnicalTest/DiagramGA-Composer-BQ.png?raw=true)
 
 #### Authentication and Access
 To extract data from the Google Analytics API, we'll need to set up authentication and authorize the application: <br>
@@ -54,7 +54,7 @@ First, we need to create a Python file to define the DAG in the Cloud Composer e
 File path in Cloud Composer:<br>
 ##### /home/airflow/gcs/dags/etl_google_analytics_to_bigquery.py
 
-<a href = "https://github.com/katerinneramos/data-engineer-technical-test/blob/addProyect/4TechnicalTest/etl_google_analytics_to_bigquery.py">Link to etl_google_analytics_to_bigquery.py</a>
+<a href = "https://github.com/katerinneramos/data-engineer-technical-test/blob/main/4TechnicalTest/etl_google_analytics_to_bigquery.py">Link to etl_google_analytics_to_bigquery.py</a>
 <br>
 
 ```PYTHON
@@ -234,9 +234,9 @@ Monitors the execution of the DAG to verify that data is correctly extracted and
 Table to store the etl_google_analytics_to_bigquery <br>
 <br>
 
-![week_over_week-analytics.png](https://github.com/katerinneramos/data-engineer-technical-test/blob/addProyect/4TechnicalTest/week_over_week-analytics.png?raw=true)
+![week_over_week-analytics.png](https://github.com/katerinneramos/data-engineer-technical-test/blob/main/4TechnicalTest/week_over_week-analytics.png?raw=true)
 
-<a href = "https://github.com/katerinneramos/data-engineer-technical-test/blob/addProyect/4TechnicalTest/weekly_analytics_report.sql">Link to Create Table Query: weekly_analytics_report.sql</a>
+<a href = "https://github.com/katerinneramos/data-engineer-technical-test/blob/main/4TechnicalTest/weekly_analytics_report.sql">Link to Create Table Query: weekly_analytics_report.sql</a>
 <br>
 
 ```SQL
@@ -292,11 +292,11 @@ We'll use DBT for data modeling and automating the data transformation process. 
 We need to define dbt models to handle the extraction and transformation of data, and then calculate the week-over-week metrics. <br>
 
 Our dbt project is demo-dbt-project <br>
-<a href = "https://github.com/katerinneramos/data-engineer-technical-test/tree/addProyect/4TechnicalTest/demo-dbt-proyect/demo_dbt_proyect">Link to demo-dbt-project</a>
+<a href = "https://github.com/katerinneramos/data-engineer-technical-test/tree/main/4TechnicalTest/demo-dbt-proyect/demo_dbt_proyect">Link to demo-dbt-project</a>
 
 ### We create dimension tables
 
-<a href = "https://github.com/katerinneramos/data-engineer-technical-test/blob/addProyect/4TechnicalTest/demo-dbt-proyect/demo_dbt_proyect/models/dim_device.sql">Link to dim_device</a>
+<a href = "https://github.com/katerinneramos/data-engineer-technical-test/blob/main/4TechnicalTest/demo-dbt-proyect/demo_dbt_proyect/models/dim_device.sql">Link to dim_device</a>
 
 ```SQL
 WITH device AS (
@@ -315,7 +315,7 @@ FROM
     device d;
 ```
 
-<a href = "https://github.com/katerinneramos/data-engineer-technical-test/blob/addProyect/4TechnicalTest/demo-dbt-proyect/demo_dbt_proyect/models/dim_campaign.sql">Link to dim_campaign</a>
+<a href = "https://github.com/katerinneramos/data-engineer-technical-test/blob/main/4TechnicalTest/demo-dbt-proyect/demo_dbt_proyect/models/dim_campaign.sql">Link to dim_campaign</a>
 
 ```SQL
 WITH campaign AS (
@@ -334,7 +334,7 @@ FROM
     campaign camp;
 ```
 
-<a href = "https://github.com/katerinneramos/data-engineer-technical-test/blob/addProyect/4TechnicalTest/demo-dbt-proyect/demo_dbt_proyect/models/dim_country.sql">Link to dim_country</a>
+<a href = "https://github.com/katerinneramos/data-engineer-technical-test/blob/main/4TechnicalTest/demo-dbt-proyect/demo_dbt_proyect/models/dim_country.sql">Link to dim_country</a>
 
 ```SQL
 WITH country AS (
@@ -353,7 +353,7 @@ FROM
     country c;
 ```
 
-<a href = "https://github.com/katerinneramos/data-engineer-technical-test/blob/addProyect/4TechnicalTest/demo-dbt-proyect/demo_dbt_proyect/models/dim_calendar.sql">Link to dim_calendar</a>
+<a href = "https://github.com/katerinneramos/data-engineer-technical-test/blob/main/4TechnicalTest/demo-dbt-proyect/demo_dbt_proyect/models/dim_calendar.sql">Link to dim_calendar</a>
 
 ```SQL
 WITH datetime AS ( 
@@ -385,7 +385,7 @@ FROM datetime;
 
 We create an staging, intermediate and final model.
 ### Staging Model
-<a href = "https://github.com/katerinneramos/data-engineer-technical-test/blob/addProyect/4TechnicalTest/demo-dbt-proyect/demo_dbt_proyect/models/week_over_week_analytics_stg.sql">Link to Staging Model: week_over_week_analytics_stg.sql</a>
+<a href = "https://github.com/katerinneramos/data-engineer-technical-test/blob/main/4TechnicalTest/demo-dbt-proyect/demo_dbt_proyect/models/week_over_week_analytics_stg.sql">Link to Staging Model: week_over_week_analytics_stg.sql</a>
 
 ```SQL
 {{ config(
@@ -429,7 +429,7 @@ FROM
 ```
 
 ### Intermediate Model
-<a href = "https://github.com/katerinneramos/data-engineer-technical-test/blob/addProyect/4TechnicalTest/demo-dbt-proyect/demo_dbt_proyect/models/week_over_week_analytics_int.sql">Link to Intermediate Model: week_over_week_analytics_int.sql</a>
+<a href = "https://github.com/katerinneramos/data-engineer-technical-test/blob/main/4TechnicalTest/demo-dbt-proyect/demo_dbt_proyect/models/week_over_week_analytics_int.sql">Link to Intermediate Model: week_over_week_analytics_int.sql</a>
 
 ```SQL
 {{ config(
@@ -482,7 +482,7 @@ INNER JOIN {{ ref('dim_campaign') }} dcamp ON week.campaign_id = dcamp.campaign_
 ```
 
 ### Final Model for Week-over-Week Metrics
-<a href = "https://github.com/katerinneramos/data-engineer-technical-test/blob/addProyect/4TechnicalTest/demo-dbt-proyect/demo_dbt_proyect/models/week_over_week_analytics.sql">Link to Final Model: week_over_week_analytics.sql</a>
+<a href = "https://github.com/katerinneramos/data-engineer-technical-test/blob/main/4TechnicalTest/demo-dbt-proyect/demo_dbt_proyect/models/week_over_week_analytics.sql">Link to Final Model: week_over_week_analytics.sql</a>
 
 ```SQL
 {{ config(
@@ -569,7 +569,7 @@ demo_dbt_proyect:
 <br>
 
 #### And configure the schema.yml as follow:
-<a href = "https://github.com/katerinneramos/data-engineer-technical-test/blob/addProyect/4TechnicalTest/demo-dbt-proyect/demo_dbt_proyect/models/schema.yml">Link to schema.yml</a>
+<a href = "https://github.com/katerinneramos/data-engineer-technical-test/blob/main/4TechnicalTest/demo-dbt-proyect/demo_dbt_proyect/models/schema.yml">Link to schema.yml</a>
 
 ```YAML
 version: 2
@@ -743,7 +743,7 @@ models:
 ```
 
 #### And configure de source.yml
-<a href = "https://github.com/katerinneramos/data-engineer-technical-test/blob/addProyect/4TechnicalTest/demo-dbt-proyect/demo_dbt_proyect/models/source.yml">Link to source.yml</a>
+<a href = "https://github.com/katerinneramos/data-engineer-technical-test/blob/main/4TechnicalTest/demo-dbt-proyect/demo_dbt_proyect/models/source.yml">Link to source.yml</a>
 
 ```YAML
 version: 2
