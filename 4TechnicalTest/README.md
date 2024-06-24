@@ -221,6 +221,8 @@ CREATE TABLE `demo-dbt-project.analytics-report.weekly_analytics_report` (
 We'll use DBT for data modeling and automating the data transformation process. <br> 
 We need to define dbt models to handle the extraction and transformation of data, and then calculate the week-over-week metrics. <br>
 
+Our dbt project is demo-dbt-project <br>
+<a href = "https://github.com/katerinneramos/data-engineer-technical-test/tree/addProyect/4TechnicalTest/demo-dbt-proyect/demo_dbt_proyect">Link to demo-dbt-project</a>
 
 ### We create dimension tables
 
