@@ -25,6 +25,7 @@ week-over-week metrics. Store the results in a separate table. <br>
 
 
 ## Data Extraction
+
 ![DiagramGA-Composer-BQ.png](attachment:521ccbb9-aacd-4ce7-ac5e-2ac1f6cbb151.png) <br>
 
 #### Authentication and Access
@@ -68,7 +69,8 @@ Monitors the execution of the DAG to verify that data is correctly extracted and
 ## Data Modeling
 Table to store the etl_google_analytics_to_bigquery <br>
 <br>
-![tableAnalyticsReport.png](attachment:03d8336e-09a2-4869-99ef-86b3632d5f36.png)
+
+![week_over_week-analytics.png](attachment:0bb5e4a6-0c04-41c7-93e6-4c144736e63d.png)
 
 <a href = "https://github.com/katerinneramos/data-engineer-technical-test/blob/addProyect/4TechnicalTest/weekly_analytics_report.sql">Link to Create Table Query: weekly_analytics_report.sql</a>
 <br>
@@ -79,44 +81,57 @@ We need to define dbt models to handle the extraction and transformation of data
 
 We create an staging, intermediate and final model.
 ### Staging Model
-<a href = "https://github.com/katerinneramos/data-engineer-technical-test/blob/addProyect/4TechnicalTest/weekly_analytics_report.sql">Link to Staging Model: week_over_week_analytics_stg.sql</a>
+<a href = "https://github.com/katerinneramos/data-engineer-technical-test/blob/addProyect/4TechnicalTest/demo-dbt-proyect/demo_dbt_proyect/models/week_over_week_analytics_stg.sql">Link to Staging Model: week_over_week_analytics_stg.sql</a>
 <br>
 
 ### Intermediate Model
-<a href = "https://github.com/katerinneramos/data-engineer-technical-test/blob/addProyect/4TechnicalTest/weekly_analytics_report.sql">Link to Staging Model: week_over_week_analytics_int.sql</a>
+<a href = "https://github.com/katerinneramos/data-engineer-technical-test/blob/addProyect/4TechnicalTest/demo-dbt-proyect/demo_dbt_proyect/models/week_over_week_analytics_int.sql">Link to Intermediate Model: week_over_week_analytics_int.sql</a>
 <br>
 
 ### Final Model for Week-over-Week Metrics
-<a href = "https://github.com/katerinneramos/data-engineer-technical-test/blob/addProyect/4TechnicalTest/weekly_analytics_report.sql">Link to Staging Model: week_over_week_analytics.sql</a>
+<a href = "https://github.com/katerinneramos/data-engineer-technical-test/blob/addProyect/4TechnicalTest/demo-dbt-proyect/demo_dbt_proyect/models/week_over_week_analytics.sql">Link to Final Model: week_over_week_analytics.sql</a>
 <br>
 
 ### We can create dimension tables
 
-## dim_devices
-<a href = "https://github.com/katerinneramos/data-engineer-technical-test/blob/addProyect/4TechnicalTest/weekly_analytics_report.sql">Link to dim_devices</a>
+### dim_devices
+<a href = "https://github.com/katerinneramos/data-engineer-technical-test/blob/addProyect/4TechnicalTest/demo-dbt-proyect/demo_dbt_proyect/models/dim_device.sql">Link to dim_devices</a>
 <br>
 
-## dim_campaign
+### dim_campaign
 
-<a href = "https://github.com/katerinneramos/data-engineer-technical-test/blob/addProyect/4TechnicalTest/weekly_analytics_report.sql">Link to dim_campaign</a>
+<a href = "https://github.com/katerinneramos/data-engineer-technical-test/blob/addProyect/4TechnicalTest/demo-dbt-proyect/demo_dbt_proyect/models/dim_campaign.sql">Link to dim_campaign</a>
 <br>
 
-## dim_country
-<a href = "https://github.com/katerinneramos/data-engineer-technical-test/blob/addProyect/4TechnicalTest/weekly_analytics_report.sql">Link to dim_country</a>
+### dim_country
+<a href = "https://github.com/katerinneramos/data-engineer-technical-test/blob/addProyect/4TechnicalTest/demo-dbt-proyect/demo_dbt_proyect/models/dim_country.sql">Link to dim_country</a>
 <br>
 
-## dim_calendar
-<a href = "https://github.com/katerinneramos/data-engineer-technical-test/blob/addProyect/4TechnicalTest/weekly_analytics_report.sql">Link to dim_calendar</a>
+### dim_calendar
+<a href = "https://github.com/katerinneramos/data-engineer-technical-test/blob/addProyect/4TechnicalTest/demo-dbt-proyect/demo_dbt_proyect/models/dim_calendar.sql">Link to dim_calendar</a>
 <br>
 <br>
 
 #### For this we need to set up the profiles.yml file with your BigQuery configuration:
-<a href = "https://github.com/katerinneramos/data-engineer-technical-test/blob/addProyect/4TechnicalTest/weekly_analytics_report.sql">Link to profiles.yml</a>
+
+demo_dbt_proyect:
+  outputs:
+    dev:
+      dataset: analytics-report
+      job_execution_timeout_seconds: 600
+      job_retries: 1
+      location: US
+      method: oauth
+      priority: interactive
+      project: demo-dbt-project
+      threads: 2
+      type: bigquery
+  target: dev
 <br>
 
 #### And configure the schema.yml as follow:
-<a href = "https://github.com/katerinneramos/data-engineer-technical-test/blob/addProyect/4TechnicalTest/weekly_analytics_report.sql">Link to schema.yml</a>
+<a href = "https://github.com/katerinneramos/data-engineer-technical-test/blob/addProyect/4TechnicalTest/demo-dbt-proyect/demo_dbt_proyect/models/schema.yml">Link to schema.yml</a>
 <br>
 
 #### And configure de source.yml
-<a href = "https://github.com/katerinneramos/data-engineer-technical-test/blob/addProyect/4TechnicalTest/weekly_analytics_report.sql">Link to source.yml</a>
+<a href = "https://github.com/katerinneramos/data-engineer-technical-test/blob/addProyect/4TechnicalTest/demo-dbt-proyect/demo_dbt_proyect/models/source.yml">Link to source.yml</a>

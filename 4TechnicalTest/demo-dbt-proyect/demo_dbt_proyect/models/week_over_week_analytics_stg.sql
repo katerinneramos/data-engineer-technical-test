@@ -18,7 +18,7 @@ WITH source AS (
         campaign,
         campaign_id
     FROM
-        {{ source('analytics', 'weekly_analytics_report') }}
+        {{ source('analytics-report', 'weekly_analytics_report') }}
 )
 SELECT
     week_start_date,

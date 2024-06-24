@@ -1,6 +1,6 @@
 version: 2
 
 sources:
-  - name: analytics
+  - name: analytics-report
     tables:
       - name: weekly_analytics_report

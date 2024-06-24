@@ -53,8 +53,11 @@ def extract_load():
     ]
     dimensions = [
         {'name': 'ga:date'},
-        {'name': 'ga:deviceCategory'},
+        {'name': 'ga:devices'},
         {'name': 'ga:country'}
+        {'name': 'ga:postal_co'}
+        {'name': 'ga:campaign'}
+        {'name': 'ga:campaign_id'}
     ]
 
     # Make the API request
@@ -76,7 +79,10 @@ def extract_load():
         for row in report.get('data', {}).get('rows', []):
             date = row.get('dimensions', [])[0]
             devices = row.get('dimensions', [])[1]
-            geography = row.get('dimensions', [])[2]
+            country = row.get('dimensions', [])[2]
+            postal_co = row.get('dimensions', [])[3]
+            campaign = row.get('dimensions', [])[4]
+            campaign_id = row.get('dimensions', [])[5]
             metrics_data = row.get('metrics', [])[0].get('values', [])
             rows.append({
                 'week_start_date': date,
@@ -86,13 +92,16 @@ def extract_load():
                 'bounce_rate': float(metrics_data[3]),
                 'conversion_rate': float(metrics_data[4]),
                 'devices': devices,
-                'geography': geography,
+                'country': country,
+                'postal_co': postal_co,
+                'campaign': campaign,
+                'campaign_id': campaign_id,
                 'average_session_duration': float(metrics_data[5])
             })
 
     # Load data into BigQuery
     client = bigquery.Client()
-    table_id = 'demo-dbt-project.analytics.weekly_analytics_report'
+    table_id = 'demo-dbt-project.analytics-report.weekly_analytics_report'
     errors = client.insert_rows_json(table_id, rows)
 
     if errors:
