@@ -25,7 +25,8 @@ week-over-week metrics. Store the results in a separate table. <br>
 
 
 ## Data Extraction
-![DiagramGA-Composer-BQ.png](https://github.com/katerinneramos/data-engineer-technical-test/blob/addProyect/4TechnicalTest/DiagramGA-Composer-BQ.pngraw=true)
+
+![DiagramGA-Composer-BQ.png](https://github.com/katerinneramos/data-engineer-technical-test/blob/addProyect/4TechnicalTest/DiagramGA-Composer-BQ.png?raw=true)
 
 #### Authentication and Access
 To extract data from the Google Analytics API, we'll need to set up authentication and authorize the application: <br>
