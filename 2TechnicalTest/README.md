@@ -1,19 +1,4 @@
 # Data Engineer Technical Test
-## Exercises 1
-##### Implement the "annograms" function that uses the WORD.LST file to return anagrams of the word given in the "word" parameter.
-
-def annograms(word): <br>
-   #Write your code here. <br>
-   words = [w.rstrip() for w in open('WORD.LST')]<br>
-   raise NotImplementedError<br>
-if __name__ == "__main__":<br>
-   print(annograms("train"))<br>
-   print('--')<br>
-   print(annograms('drive'))<br>
-   print('--')<br>
-   print(annograms('python'))<br>
-<br>
-
 ## Exercises 2
 Bleatrix Trotter the sheep has devised a strategy that helps her fall asleep <br>
 faster. First, she picks a number N. Then she starts naming N, 2 × N, 3 × N, and <br>
@@ -74,42 +59,3 @@ for the first time in the numbers 10, 10, 2, 30, 4, 50, 6, 70, and 8, respective
 - In Case #4, Bleatrix will name 11, 22, 33, 44, 55, 66, 77, 88, 99, 110 and then fall asleep. <br>
 - Case #5 is the one described in the problem statement. <br>
 <br>
-
-## Exercises 3
-Generate a report with a tool of your choice (eg. pandas, jupyter notebooks,etc), 
-##### The report must comply the following requirements :
-The summary_date must be in ISO Date format. <br>
-The metrics must be grouped by campaign. <br>
-The metrics that must be: <br>
-Number of impressions. <br>
-Number of clicks. <br>
-Number of installs. <br>
-Amount of spend. <br>
-CTR (number of clicks/number of impressions) <br>
-CPI (amount of spend/number of installs) <br>
-<br>
-
-## Exercises 4
-#### Data pipeline Design:
-Design a data pipeline to create a week-over-week report using Google <br>
-Analytics data. The report should provide insights into website traffic trends <br>
-and key performance indicators for each week. <br>
-#### Data Extraction:
-Describe your approach to extract data from the Google Analytics API <br>
-and store it in BigQuery. Explain the steps you would take to achieve this, <br>
-including any necessary authentication, data retrieval, and data loading into <br>
-BigQuery. You can use any method or tool of your choice, and there is no <br>
-restriction on using open-source or proprietary solutions. <br>
-#### Data Modeling:
-Design a table to store the week-over-week report data. The table <br>
-should have columns for week_start_date, sessions, pageviews, users, <br>
-bounce_rate, conversion_rate, etc. The week_start_date column will be used to <br>
-represent each reporting week's starting date. <br>
-#### Generating the Week-over-Week Report:
-Use a SQL query to aggregate the data from the extracted table to <br>
-calculate the week-over-week metrics. For example, calculate the percentage <br>
-change in sessions, pageviews, users, etc., from the previous week. <br>
-#### Bonus: Using dbt for Data Modeling (Partial Implementation):
-For bonus points, you can use dbt to automate the data modeling process. <br>
-Create dbt models to define the data transformations required to calculate <br>
-week-over-week metrics. Store the results in a separate table. <br>
